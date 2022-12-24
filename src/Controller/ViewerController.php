@@ -37,10 +37,12 @@ class ViewerController extends AbstractController
         if(null === $date) {
             $date = \DateTime::createFromFormat('Y-m-d', implode('-', $dateParts));
         }
-
+        
+        $level = $request->query->has('level') ? $request->query->get('level') : 'ALL';
+        
         $filePattern = $request->query->has('file') ? $request->query->get('file') : null;
 
-        $logs = $logParser->parseLogs($date, $filePattern, true);
+        $logs = $logParser->parseLogs($date, $filePattern, true, $level);
 
         return $this->json($logs);
     }

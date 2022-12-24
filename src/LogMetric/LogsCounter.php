@@ -92,5 +92,10 @@ class LogsCounter implements LogMetricInterface
     {
         return $this->icon;
     }
+    
+    public function getFilters(): array
+    {
+        return $this->filters;
+    }
 
 }

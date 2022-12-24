@@ -36,6 +36,7 @@ class Configuration implements ConfigurationInterface
                     ->arrayPrototype()
                         ->children()
                             ->scalarNode('regex')->end()
+                            ->scalarNode('width')->end()
                             ->scalarNode('type')
                                 ->defaultValue('text')
                                 ->validate()

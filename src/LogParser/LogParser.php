@@ -95,6 +95,7 @@ class LogParser implements LogParserInterface
             ->getIterator();
 
         foreach ($files as $fileInfo) {
+            $date = [];
             $success = preg_match('/\-([0-9\-]+).log*/', $fileInfo->getFilename(), $date);
             if ($success) {
                 try {
@@ -129,7 +130,7 @@ class LogParser implements LogParserInterface
      * @return array
      * @throws Exception
      */
-    public function parseLogs(DateTime $dateTime, string $filePattern = null, bool $merge = false): array
+    public function parseLogs(DateTime $dateTime, string $filePattern = null, bool $merge = false, string $level = 'ALL'): array
     {
         $parsedLogs = [];
         $this->errors = [];
@@ -155,6 +156,12 @@ class LogParser implements LogParserInterface
             } else {
                 $parsedLogs = array_merge([], ...array_values($parsedLogs));
             }
+        }
+        
+        if( $level !== 'ALL' ) {
+            $parsedLogs = array_filter($parsedLogs, function($log) use ($level) {
+                return $log['level']=== $level; 
+            });
         }
 
         return $parsedLogs;

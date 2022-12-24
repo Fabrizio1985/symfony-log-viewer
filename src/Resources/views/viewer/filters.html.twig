@@ -24,6 +24,18 @@
                             {% endfor %}
                         </select>
                     </div>
+                    
+                     <div class="flex flex-col space-y-2 toggleable">
+                        <label for="date_filter" class="text-gray-700">Level</label>
+                        <select class="h-10 pl-3 pr-6 w-40 md:w-auto text-base placeholder-gray-600 border rounded-md appearance-none focus:shadow-outline" id="level-filter">
+                            <option value="ALL">ALL</option>
+                            <option value="DEBUG">DEBUG</option>
+                            <option value="INFO">INFO</option>
+                            <option value="WARN">WARNING</option>
+                            <option value="ERROR">ERROR</option>
+                        </select>
+                    </div>
+                    
                     <div class="flex flex-col space-y-2 hidden toggleable">
                         <label for="file_filter" class="text-gray-700">File</label>
                         <select class="h-10 pl-3 pr-6 w-40 md:w-auto text-base placeholder-gray-600 border rounded-md appearance-none focus:shadow-outline" id="file-filter">
