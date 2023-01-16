@@ -150,12 +150,7 @@ class LogParser implements LogParserInterface
         }
 
         if ($merge) {
-            // Unpacking string-keys arrays is possible since PHP 8.1
-            if (PHP_MAJOR_VERSION >= 8 && PHP_MINOR_VERSION >= 1) {
-                $parsedLogs = array_merge([], ...$parsedLogs);
-            } else {
-                $parsedLogs = array_merge([], ...array_values($parsedLogs));
-            }
+            $parsedLogs = array_merge([], ...array_values($parsedLogs));
         }
         
         if( $level !== 'ALL' ) {
