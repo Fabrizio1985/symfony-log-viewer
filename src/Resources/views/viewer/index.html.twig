@@ -119,7 +119,6 @@
     				}
             	})),
             	createdRow: function( row, data, dataIndex){
-            		console.log(data);
             		if(data.level === 'ERROR' || data.level === 'CRITICAL' ) {
             			$(row).addClass('redClass');
             		} else if(data.level === 'WARNING') {
