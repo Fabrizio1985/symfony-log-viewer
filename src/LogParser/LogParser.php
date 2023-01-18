@@ -154,9 +154,9 @@ class LogParser implements LogParserInterface
         }
         
         if( $level !== 'ALL' ) {
-            $parsedLogs = array_filter($parsedLogs, function($log) use ($level) {
+            $parsedLogs = array_values(array_filter($parsedLogs, function($log) use ($level) {
                 return $log['level']=== $level; 
-            });
+            }));
         }
 
         return $parsedLogs;
