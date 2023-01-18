@@ -21,6 +21,14 @@
           	overflow: hidden;
           	text-overflow: ellipsis;
         }
+        
+        .redClass {
+        	background-color: #ff05053b !important;
+        }
+        
+        .yellowClass {
+        	background-color: #f1cc003b !important;
+        }
     </style>
 {% endblock %}
 {% block javascripts %}
@@ -85,6 +93,7 @@
         		search: {
         			caseInsensitive: true
         		},
+        		asStripeClasses: [ '' ],
         		ajax: {
         			url: `${logsTable.data('remote-url')}?` + new URLSearchParams(urlParams),
         			dataSrc: '',
@@ -108,7 +117,15 @@
     				render: groupsConfig[groupName].type === 'date' ? DataTable.render.datetime('HH:mm:ss', 'it') : function(value) {
     					return format(value, groupsConfig[groupName].type)
     				}
-            	}))
+            	})),
+            	createdRow: function( row, data, dataIndex){
+            		console.log(data);
+            		if(data.level === 'ERROR' || data.level === 'CRITICAL' ) {
+            			$(row).addClass('redClass');
+            		} elseif(data.level === 'WARNING') {
+            			$(row).addClass('yellowClass');
+            		}
+            	}
         	};
         	
         	const logsDataTable = logsTable.DataTable(datatableOptions);
