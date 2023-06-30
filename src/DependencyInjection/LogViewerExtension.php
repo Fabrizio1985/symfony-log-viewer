@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class LogViewerExtension extends Extension
 {
-    public function getAlias()
+    public function getAlias(): string
     {
         return 'kira_log_viewer';
     }
