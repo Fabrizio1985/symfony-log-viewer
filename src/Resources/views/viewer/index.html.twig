@@ -4,6 +4,7 @@
     <link href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.13.2/jquery-ui.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-contextmenu@2.9.2/dist/jquery.contextMenu.min.css">
     
     <style>
         .toggle-checkbox:checked {
@@ -44,6 +45,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.13.2/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/jeffreydwalter/ColReorderWithResize@9ce30c640e394282c9e0df5787d54e5887bc8ecc/ColReorderWithResize.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-contextmenu@2.9.2/dist/jquery.contextMenu.min.js"></script>    
     
     <script type="text/javascript">
     
@@ -130,6 +132,7 @@
         		columnDefs: [
         			{ targets: "no-sort", orderable: false },
         			{ targets: "_all", className: "border border-gray-400" },
+        			{ targets: 0, className: "context-menu" },
         			
         			{% for key, group in groups %}
         				{ targets: {{loop.index0}}, visible: {% if group.visible %}true{% else %}false{% endif %}  },
@@ -138,7 +141,7 @@
         		columns: Object.keys(groupsConfig).map((groupName) => ({
     				data: groupName,
     				width: groupsConfig[groupName].width,
-    				render: groupsConfig[groupName].type === 'date' ? DataTable.render.datetime('DD-MM-YYYY HH:mm:ss', 'it') : (value) => format(value, groupsConfig[groupName].type)
+    				render: groupsConfig[groupName].type === 'date' ? DataTable.render.datetime() : (value) => format(value, groupsConfig[groupName].type)
             	})),
             	createdRow: function( row, data, dataIndex){
             		if(data.level === 'ERROR' || data.level === 'CRITICAL' ) {
@@ -159,9 +162,27 @@
         		logsDataTable.column(Number(obj.id)).visible(obj.selected);
   			});
         	
-        	
-        	//logsDataTable.column(2).visible(false);
-        	
+        	$.contextMenu({
+    			selector: ".context-menu",
+			    items: {
+			    	to: {name: "Seleziona come data a", callback: (key, opt) => { 
+			        	const cellIndex = parseInt(opt.$trigger[0].cellIndex);
+           				const row = logsDataTable.row(opt.$trigger[0].parentNode);
+           				const data = row.data();
+           				
+           				dateFilterToInput.val(new Date(data.date).toLocaleString('sv').replace(' ', 'T').slice(0,16));
+			        }},
+			        from: {name: "Seleziona come data da", callback: (key, opt) => { 
+			        	const cellIndex = parseInt(opt.$trigger[0].cellIndex);
+           				const row = logsDataTable.row(opt.$trigger[0].parentNode);
+           				const data = row.data();
+           				
+           				dateFilterFromInput.val(new Date(data.date).toLocaleString('sv').replace(' ', 'T').slice(0,16));
+           				
+			        }}
+			    }
+			});
+			
         	// Click on row
         	$('#logsTable tbody').on('click', 'td', function () {
         		var data = logsDataTable.cell( this ).data();
