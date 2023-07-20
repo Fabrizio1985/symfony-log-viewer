@@ -2,67 +2,76 @@
 
     <div class="flex flex-wrap">
         <div class="w-full p-3">
-            <div class="bg-white border rounded shadow p-2 text-sm flex flex-col md:flex-row space-x-5">
-                <div class="flex space-x-5">
-                    <!--Filters-->
-                    <div class="flex flex-col space-y-2">
-                        <label for="toggle" class="text-gray-700">Toggle filter</label>
-                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                            <input type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                            <label for="toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
-                        </div>
-                    </div>
-                    <div class="flex flex-col space-y-2 toggleable">
-                        <label for="date_filter" class="text-gray-700">Date</label>
-                        <select class="h-10 pl-3 pr-6 w-40 md:w-auto text-base placeholder-gray-600 border rounded-md appearance-none focus:shadow-outline" id="date-filter">
-                            {% for date in dates %}
-                                {% if date.timestamp is defined %}
-                                <option value="{{ date|date('Y-m-d') }}">{{ date|date('Y-m-d') }}</option>
-                                {% else %}
-                                <option disabled value="{{ date }}">{{ date }}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                     <div class="flex flex-col space-y-2 toggleable">
-                        <label for="date_filter" class="text-gray-700">Level</label>
-                        <select class="h-10 pl-3 pr-6 w-40 md:w-auto text-base placeholder-gray-600 border rounded-md appearance-none focus:shadow-outline" id="level-filter">
-                            <option value="ALL">ALL</option>
-                            <option value="DEBUG">DEBUG</option>
-                            <option value="INFO">INFO</option>
-                            <option value="WARN">WARNING</option>
-                            <option value="ERROR">ERROR</option>
-                        </select>
-                    </div>
-                    
-                    <div class="flex flex-col space-y-2 hidden toggleable">
-                        <label for="file_filter" class="text-gray-700">File</label>
-                        <select class="h-10 pl-3 pr-6 w-40 md:w-auto text-base placeholder-gray-600 border rounded-md appearance-none focus:shadow-outline" id="file-filter">
-                            <option value="all">All</option>
-                            {% for file in files %}
-                                <option value="{{ file.filename }}">{{ file.filename }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="flex flex-col justify-end space-y-2">
-                        <button id="apply-filter" type="button" class="rounded-sm focus:outline-none focus:shadow-outline inline-flex py-1 px-2 shadow bg-blue-500 text-white">
-                            Filter
-                        </button>
-                    </div>
-                    <!--/Filters-->
-                </div>
-                <div class="flex-grow flex justify-end items-center pt-5 md:pt-0">
-                    <!--Search-->
-                    <div class="flex space-x-2 px-5">
-                        <label for="case" class="text-gray-700">Case sensitive</label>
-                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                            <input type="checkbox" name="toggle-case" id="toggle-case" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                            <label for="case" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
-                        </div>
-                    </div>
-                    <!--/Search-->
-                </div>
+        
+            <div class="bg-white border rounded shadow p-2 text-sm flex flex-col">
+            
+            	<div class="flex">
+	                <div class="flex space-x-5">
+	                    <!--Filters-->
+	                    <div class="flex flex-col space-y-2">
+	                        <label for="date_filter" class="text-gray-700">Da</label>
+	                        <input type="datetime-local" id="date-filter-from">
+	                    </div>
+	                    
+	                    <div class="flex flex-col space-y-2">
+	                        <label for="date_filter" class="text-gray-700">A</label>
+	                        <input type="datetime-local" id="date-filter-to">
+	                    </div>
+	                    
+	                    <div class="flex flex-col space-y-2">
+	                        <label for="date_filter" class="text-gray-700">Level</label>
+	                        <select class="h-10 pl-3 pr-6 w-40 md:w-auto text-base placeholder-gray-600 border rounded-md appearance-none focus:shadow-outline" id="level-filter">
+	                            <option value="ALL">ALL</option>
+	                            <option value="DEBUG">DEBUG</option>
+	                            <option value="INFO">INFO</option>
+	                            <option value="WARN">WARNING</option>
+	                            <option value="ERROR">ERROR</option>
+	                        </select>
+	                    </div>
+	                    
+	                    <div class="flex flex-col space-y-2 hidden">
+	                        <label for="file_filter" class="text-gray-700">File</label>
+	                        <select class="h-10 pl-3 pr-6 w-40 md:w-auto text-base placeholder-gray-600 border rounded-md appearance-none focus:shadow-outline" id="file-filter">
+	                            <option value="all">All</option>
+	                            {% for file in files %}
+	                                <option value="{{ file.filename }}">{{ file.filename }}</option>
+	                            {% endfor %}
+	                        </select>
+	                    </div>
+	                    <div class="flex flex-col justify-end space-y-2">
+	                        <button id="apply-filter" type="button" class="rounded-sm focus:outline-none focus:shadow-outline inline-flex py-1 px-2 shadow bg-blue-500 text-white">
+	                            Filter
+	                        </button>
+	                    </div>
+	                    
+	                    <!--/Filters-->
+	                </div>
+	                <div class="flex-grow flex justify-end items-center pt-5 md:pt-0">
+	                    <!--Search Button-->
+	                    <div class="flex space-x-2 px-5">
+	                        <label for="case" class="text-gray-700">Case sensitive</label>
+	                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+	                            <input type="checkbox" name="toggle-case" id="toggle-case" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+	                            <label for="case" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+	                        </div>
+	                    </div>
+	                    <!--/Search Button-->
+	                </div>
+				</div>
+				
+				<div class="flex">
+					<div class="flex flex-col space-y-2" style="flex: 1">
+						<label for="select-column-field" class="text-gray-700">Colonne visibili</label>
+						<select class="form-select" id="select-column-field" data-placeholder="Choose anything" style="" multiple>
+						    <option value="0" selected="selected">Data</option>
+						    <option value="1">Channel</option>
+						    <option value="2" selected="selected">Level</option>
+						    <option value="3" selected="selected">Message</option>
+						    <option value="4">Context</option>
+						    <option value="5">Extra</option>
+						</select>
+					</div>
+				</div>
             </div>
         </div>
     </div>

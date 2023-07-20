@@ -15,8 +15,5 @@ kira_log_viewer.viewer.ajax:
     methods: [ GET ]
     requirements:
         _format: xmlhttp
-        year: '\d{4}'
-        month: '\d{2}'
-        day: '\d{2}'
 
 #########< Dashboard routes >#########

@@ -1,8 +1,10 @@
 {% extends '@LogViewer/base.html.twig' %}
 
 {% block stylesheets %}
-    <link href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.13.2/jquery-ui.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    
     
     <style>
         .toggle-checkbox:checked {
@@ -33,10 +35,11 @@
 {% endblock %}
 {% block javascripts %}
 
-    <script src="https://code.jquery.com/jquery-3.6.1.min.js" type="text/javascript"></script>
-    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js" type="text/javascript"></script>
     <script src="https://momentjs.com/downloads/moment.min.js" type="text/javascript"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.5/js/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-dist@1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <script type="text/javascript">
     
@@ -44,13 +47,31 @@
         	const logsTable = $('#logsTable');
         	const groupsConfig = logsTable.data('groups-config');
         	
-        	const toggleFilter = document.querySelector('#toggle');
-        	const toggleable = document.querySelectorAll('.toggleable');
-        	const btnFilter = document.querySelector('#apply-filter');
-        	const dateFilterInput = document.querySelector('#date-filter');
-        	const fileFilterSelect = document.querySelector('#file-filter');
-        	const levelFilterSelect = document.querySelector('#level-filter');
-        
+        	const btnFilter = $('#apply-filter');
+        	const dateFilterFromInput = $('#date-filter-from');
+        	const dateFilterToInput = $('#date-filter-to');
+        	const fileFilterSelect = $('#file-filter');
+        	const levelFilterSelect = $('#level-filter');
+        	const toggleCase = $('#toggle-case');
+        	const selectColumnField = $('#select-column-field');
+        	
+        	selectColumnField.select2({
+			    closeOnSelect: false,
+			    width: 'style'
+			});
+			
+			selectColumnField.on('select2:opening select2:closing', ( event ) => {
+    			var $searchfield = $(this).parent().find('.select2-search__field');
+    			$searchfield.prop('disabled', true);
+			});
+			
+			selectColumnField.on('select2:unselecting', (e) => { 
+  				selectColumnField.on('select2:opening', (ev) => {
+    				ev.preventDefault();
+    				selectColumnField.off('select2:opening');
+  				});
+			});
+			
         	const textFormat = (value) => { return value; }
         	const jsonFormat = (value) => {
         		let formattedValue = JSON.parse(value);
@@ -72,18 +93,12 @@
         	
         	const urlParams = {};
         	
-        	if (dateFilterInput.value !== 'all') {
-				let filterDate = new Date(dateFilterInput.value);
-        		let filterMonth = ("0" + (filterDate.getMonth() + 1)).slice(-2);
-        		urlParams.year = filterDate.getFullYear();
-        		urlParams.month = filterMonth;
-        		urlParams.day = filterDate.getDate();
-        	}
-        	
         	if(new URLSearchParams(window.location.search).has('level')) {
         		urlParams.level = new URLSearchParams(window.location.search).get('level');
+        		urlParams.dateFilterFrom = new Date();
         	}
         	
+        	const columnVisible = selectColumnField.select2('data').map(v => v.id);
         	
         	const datatableOptions = {
         		scrollX: true,
@@ -98,9 +113,7 @@
         			url: `${logsTable.data('remote-url')}?` + new URLSearchParams(urlParams),
         			dataSrc: '',
         			dataType: "json",
-        			error: function(xhr, error, thrown) {
-        				console.log(error)
-        			}
+        			error: (xhr, error, thrown) => console.log(error)
         		},
         		language: {
         			processing: '<i class="fas fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
@@ -108,15 +121,18 @@
         		order: [[0, "desc"]],
         		columnDefs: [
         			{ targets: "no-sort", orderable: false },
-        			{ targets: 0, className: "border border-gray-400 whitespace-nowrap" },
-        			{ targets: "_all", className: "border border-gray-400" }
+        			{ targets: "_all", className: "border border-gray-400" },
+        			{ targets: 0, visible: columnVisible.includes('0'), className: "border border-gray-400 whitespace-nowrap" },
+        			{ targets: 1, visible: columnVisible.includes('1')},
+        			{ targets: 2, visible: columnVisible.includes('2')},
+        			{ targets: 3, visible: columnVisible.includes('3')},
+        			{ targets: 4, visible: columnVisible.includes('4')},
+        			{ targets: 5, visible: columnVisible.includes('5')}
         		],
         		columns: Object.keys(groupsConfig).map((groupName) => ({
     				data: groupName,
     				width: groupsConfig[groupName].width,
-    				render: groupsConfig[groupName].type === 'date' ? DataTable.render.datetime('HH:mm:ss', 'it') : function(value) {
-    					return format(value, groupsConfig[groupName].type)
-    				}
+    				render: groupsConfig[groupName].type === 'date' ? DataTable.render.datetime('DD-MM-YYYY HH:mm:ss', 'it') : (value) => format(value, groupsConfig[groupName].type)
             	})),
             	createdRow: function( row, data, dataIndex){
             		if(data.level === 'ERROR' || data.level === 'CRITICAL' ) {
@@ -127,7 +143,18 @@
             	}
         	};
         	
+        	// Init Table
         	const logsDataTable = logsTable.DataTable(datatableOptions);
+        	
+        	
+        	// On change column visible
+        	selectColumnField.on('select2:select select2:unselect', function(e) {
+        		const obj = e.params.data || e.params.args.data;
+        		logsDataTable.column(Number(obj.id)).visible(obj.selected);
+  			});
+        	
+        	
+        	//logsDataTable.column(2).visible(false);
         	
         	// Click on row
         	$('#logsTable tbody').on('click', 'td', function () {
@@ -142,48 +169,20 @@
 				});
     		} );
         
-        	/* Toggle filters */
-        
-        	toggleFilter.addEventListener('change', function() {
-        		if (this.checked) {
-        			toggleable[0].classList.add('hidden');
-        			toggleable[1].classList.remove('hidden');
-        		} else {
-        			toggleable[1].classList.add('hidden');
-        			toggleable[0].classList.remove('hidden');
-        		}
-        	});
-        
         	/* Apply filters */
+        	btnFilter.on('click', function() {
         
-        	btnFilter.addEventListener('click', function() {
-        
-        		var url = logsTable.data('remote-url');
-        		if (toggleable[0].classList.contains('hidden')) {
-        			let filterFile = fileFilterSelect.options[fileFilterSelect.selectedIndex].value;
-        			url += '?file=' + filterFile;
-        		} else {
-        			if (dateFilterInput.value !== 'all') {
-        				let filterDate = new Date(dateFilterInput.value);
-        				let filterMonth = ("0" + (filterDate.getMonth() + 1)).slice(-2);
-        				url += '?year=' + filterDate.getFullYear() + '&month=' + filterMonth + '&day=' + filterDate.getDate();
-        			}
-        			
-        			url += '&level=' + levelFilterSelect.value;
-        		}
+        		if (dateFilterFromInput.value !== '') {
+		        	url += '?dateFilterFrom=' + dateFilterFromInput.value;
+		        }
+		        	
+		        if (dateFilterToInput.value !== '') {
+		        	url += '&dateFilterTo=' + dateFilterToInput.value;
+		        }
+		        	
+        		url += '&level=' + levelFilterSelect.value;
         
         		logsDataTable.ajax.url(url).load();
-        	});
-        
-        	/* Search */
-        	const toggleCase = document.querySelector('#toggle-case');
-        
-        	toggleCase.addEventListener('change', function() {
-        		datatableOptions.search.caseInsensitive = !this.checked;
-        		dateFilterInput.selectedIndex = 0;
-        		fileFilterSelect.selectedIndex = 0;
-        		logsDataTable.destroy();
-        		logsDataTable = logsTable.DataTable(datatableOptions);
         	});
         });
     </script>

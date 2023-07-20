@@ -1,8 +1,5 @@
 <?php
-
-
 namespace Kira0269\LogViewerBundle\LogParser;
-
 
 use DateTime;
 use Exception;
@@ -12,11 +9,15 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class LogParser implements LogParserInterface
 {
+
     const ALL_FILES = 'all';
 
     private string $logsDir;
+
     private array $filePattern;
+
     private string $logPattern;
+
     private array $groupsConfig;
 
     private array $errors = [];
@@ -24,10 +25,14 @@ class LogParser implements LogParserInterface
     /**
      * LogParser constructor.
      *
-     * @param string    $logsDir        - Logs directory.
-     * @param array     $filePattern    - Log filenames pattern.
-     * @param string    $logPattern     - Log pattern.
-     * @param array     $groupsConfig   - Parsing rules defined in config.
+     * @param string $logsDir
+     *            - Logs directory.
+     * @param array $filePattern
+     *            - Log filenames pattern.
+     * @param string $logPattern
+     *            - Log pattern.
+     * @param array $groupsConfig
+     *            - Parsing rules defined in config.
      */
     public function __construct(string $logsDir, array $filePattern, string $logPattern, array $groupsConfig)
     {
@@ -54,7 +59,7 @@ class LogParser implements LogParserInterface
      */
     public function hasErrors(): bool
     {
-        return !empty($this->errors);
+        return ! empty($this->errors);
     }
 
     /**
@@ -69,8 +74,7 @@ class LogParser implements LogParserInterface
     {
         $finder = new Finder();
         $finderPattern = $pattern ?: "*";
-        return $finder
-            ->in($this->logsDir)
+        return $finder->in($this->logsDir)
             ->files()
             ->name($finderPattern)
             ->getIterator();
@@ -88,8 +92,7 @@ class LogParser implements LogParserInterface
         $dates[] = new \DateTime();
 
         $finder = new Finder();
-        $files = $finder
-            ->in($this->logsDir)
+        $files = $finder->in($this->logsDir)
             ->files()
             ->name('*')
             ->getIterator();
@@ -100,7 +103,7 @@ class LogParser implements LogParserInterface
             if ($success) {
                 try {
                     if ($fileDate = \DateTime::createFromFormat($this->filePattern['date_format'], $date[1])) {
-                        if (!in_array($fileDate, $dates)) {
+                        if (! in_array($fileDate, $dates)) {
                             $dates[] = $fileDate;
                         }
                     }
@@ -124,27 +127,31 @@ class LogParser implements LogParserInterface
      *
      * @param DateTime $dateTime
      *
-     * @param bool     $merge - If true, merge all logs from several files into one array.
-     * @param string   $filePattern - If not null, filter on log file name pattern
-     *
+     * @param bool $merge
+     *            - If true, merge all logs from several files into one array.
+     * @param string $filePattern
+     *            - If not null, filter on log file name pattern
+     *            
      * @return array
      * @throws Exception
      */
-    public function parseLogs(DateTime $dateTime, string $filePattern = null, bool $merge = false, string $level = 'ALL'): array
+    public function parseLogs(DateTime $dateTimeFrom, DateTime $dateTimeTo = null, string $filePattern = null, bool $merge = false, string $level = 'ALL'): array
     {
         $parsedLogs = [];
         $this->errors = [];
-
-        if ($filePattern !== null) {
-            $formattedPattern = $filePattern === self::ALL_FILES ? "*" : "*$filePattern";
-        } else {
-            $formattedPattern = "*" . $dateTime->format($this->filePattern['date_format']) . ".log";
-        }
+        /*
+         * if ($filePattern !== null) {
+         * $formattedPattern = $filePattern === self::ALL_FILES ? "*" : "*$filePattern";
+         * } else {
+         * $formattedPattern = "*" . $dateTime->format($this->filePattern['date_format']) . ".log";
+         * }
+         */
+        $formattedPattern = "*";
 
         foreach ($this->getFiles($formattedPattern) as $fileInfo) {
             $parsedFile = $this->parseLogFile($fileInfo);
 
-            if (!empty($parsedFile)) {
+            if (! empty($parsedFile)) {
                 $parsedLogs[$fileInfo->getFilename()] = $parsedFile;
             }
         }
@@ -153,11 +160,24 @@ class LogParser implements LogParserInterface
             $parsedLogs = array_merge([], ...array_values($parsedLogs));
         }
         
-        if( $level !== 'ALL' ) {
-            $parsedLogs = array_values(array_filter($parsedLogs, function($log) use ($level) {
-                return $log['level']=== $level; 
-            }));
-        }
+        $parsedLogs = array_values(array_filter($parsedLogs, function ($log) use ($level, $dateTimeFrom, $dateTimeTo) {
+            
+            if( $level !== 'ALL' ) {
+                return $log['level'] === $level;
+            }
+            
+            $date = DateTime::createFromFormat('Y-m-d\TH:i:s.uP', $log['date']);
+            $date = $date->setTimezone(new \DateTimeZone('Europe/Rome'));
+            
+            // See: http://userguide.icu-project.org/formatparse/datetime for pattern syntax
+            if($date < $dateTimeFrom || (!is_null($dateTimeTo) && $date > $dateTimeTo)) {
+                return false;
+            }
+            
+            $log['date'] = $date->format('d-m-Y H:i:s');
+            
+            return true;
+        }));
 
         return $parsedLogs;
     }
@@ -177,14 +197,13 @@ class LogParser implements LogParserInterface
         $file = new \SplFileObject($logFile->getRealPath());
 
         // Loop until we reach the end of the file.
-        while (!$file->eof()) {
+        while (! $file->eof()) {
             try {
                 $parsedLine = $this->parseLine($file->fgets());
 
-                if (!empty($parsedLine)) {
+                if (! empty($parsedLine)) {
                     $parsedFile[] = $parsedLine;
                 }
-
             } catch (Exception $exception) {
                 $this->errors[] = [
                     'log_file' => $logFile->getRealPath(),
@@ -211,17 +230,17 @@ class LogParser implements LogParserInterface
     {
         $parsedLine = [];
 
-        $success = preg_match('/^'.$this->logPattern.'$/', $lineToParse, $parsedLine);
+        $success = preg_match('/^' . $this->logPattern . '$/', $lineToParse, $parsedLine);
 
         if (false === $success) {
             throw new Exception('Error during log parsing !');
         }
 
         // If 'groups' is configured, we keep only groups defined in it.
-        if (!empty($this->groupsConfig)) {
+        if (! empty($this->groupsConfig)) {
             foreach ($parsedLine as $key => $match) {
 
-                if (!key_exists($key, $this->groupsConfig)) {
+                if (! key_exists($key, $this->groupsConfig)) {
                     unset($parsedLine[$key]);
                 }
             }

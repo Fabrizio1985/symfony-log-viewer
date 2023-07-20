@@ -7,14 +7,16 @@ use Kira0269\LogViewerBundle\LogParser\LogParserInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 class DashboardController extends AbstractController
 {
+    #[Route('', methods: ['GET'])]
     public function index(LogParserInterface $logParser, LogMetrics $logMetric): Response
     {
         try {
             $displayDate = new \DateTime($this->getParameter('kira_log_viewer.dashboard.date'));
-            $metrics = $logMetric->getMetricsResults($logParser->parseLogs($displayDate, null, true));
+            $metrics = $logMetric->getMetricsResults($logParser->parseLogs($displayDate, null, null, true));
         } catch (\Exception $e) {
             throw new InvalidConfigurationException('Bad date format. Check kira_log_viewer.dashboard.date configuration. ' . $e->getMessage());
         }
