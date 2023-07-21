@@ -56,7 +56,6 @@
         	const btnFilter = $('#apply-filter');
         	const dateFilterFromInput = $('#date-filter-from');
         	const dateFilterToInput = $('#date-filter-to');
-        	const fileFilterSelect = $('#file-filter');
         	const levelFilterSelect = $('#level-filter');
         	const toggleCase = $('#toggle-case');
         	const selectColumnField = $('#select-column-field');
@@ -97,13 +96,6 @@
         		}
         	}
         	
-        	const urlParams = {};
-        	
-        	if(new URLSearchParams(window.location.search).has('level')) {
-        		urlParams.level = new URLSearchParams(window.location.search).get('level');
-        		urlParams.dateFilterFrom = new Date();
-        	}
-        	
         	const columnVisible = selectColumnField.select2('data').map(v => v.id);
         	
         	const datatableOptions = {
@@ -120,7 +112,7 @@
         		},
         		asStripeClasses: [ '' ],
         		ajax: {
-        			url: `${logsTable.data('remote-url')}?` + new URLSearchParams(urlParams),
+        			url: `${logsTable.data('remote-url')}`,
         			dataSrc: '',
         			dataType: "json",
         			error: (xhr, error, thrown) => console.log(error)
@@ -178,7 +170,6 @@
            				const data = row.data();
            				
            				dateFilterFromInput.val(new Date(data.date).toLocaleString('sv').replace(' ', 'T').slice(0,16));
-           				
 			        }}
 			    }
 			});
@@ -212,6 +203,17 @@
         
         		logsDataTable.ajax.url(url).load();
         	});
+        	
+			// if passed log level        	
+        	if(new URLSearchParams(window.location.search).has('level')) {
+        	
+        		dateFilterFromInput.val(new Date(new Date().setHours(0,0,0,0)).toLocaleString('sv').replace(' ', 'T').slice(0,16));
+        		dateFilterToInput.val(new Date(new Date().setHours(23,59,59,999)).toLocaleString('sv').replace(' ', 'T').slice(0,16));
+        	
+        		levelFilterSelect.val(new URLSearchParams(window.location.search).get('level'));
+        		
+        		btnFilter.trigger( "click" );
+        	}
         });
     </script>
     

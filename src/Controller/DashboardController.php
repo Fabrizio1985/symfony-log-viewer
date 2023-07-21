@@ -16,7 +16,7 @@ class DashboardController extends AbstractController
     {
         try {
             $displayDate = new \DateTime($this->getParameter('kira_log_viewer.dashboard.date'));
-            $metrics = $logMetric->getMetricsResults($logParser->parseLogs($displayDate, null, null, true));
+            $metrics = $logMetric->getMetricsResults($logParser->parseLogs($displayDate, null, true));
         } catch (\Exception $e) {
             throw new InvalidConfigurationException('Bad date format. Check kira_log_viewer.dashboard.date configuration. ' . $e->getMessage());
         }

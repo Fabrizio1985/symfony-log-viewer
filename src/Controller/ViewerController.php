@@ -31,9 +31,8 @@ class ViewerController extends AbstractController
             $dateFilterTo = $request->query->has('dateFilterTo') ? \DateTime::createFromFormat('Y-m-d\TH:i', $request->query->get('dateFilterTo'), new \DateTimeZone('Europe/Rome')) : null;
             
             $level = $request->query->has('level') ? $request->query->get('level') : 'ALL';
-            $filePattern = $request->query->has('file') ? $request->query->get('file') : null;
 
-            $logs = $logParser->parseLogs($dateFilterFrom, $dateFilterTo, $filePattern, true, $level);
+            $logs = $logParser->parseLogs($dateFilterFrom, $dateFilterTo, true, $level);
 
             return $this->json($logs);
         } else {

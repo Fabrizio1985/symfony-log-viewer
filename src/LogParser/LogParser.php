@@ -135,17 +135,11 @@ class LogParser implements LogParserInterface
      * @return array
      * @throws Exception
      */
-    public function parseLogs(DateTime $dateTimeFrom, DateTime $dateTimeTo = null, string $filePattern = null, bool $merge = false, string $level = 'ALL'): array
+    public function parseLogs(DateTime $dateTimeFrom, DateTime $dateTimeTo = null, bool $merge = false, string $level = 'ALL'): array
     {
         $parsedLogs = [];
         $this->errors = [];
-        /*
-         * if ($filePattern !== null) {
-         * $formattedPattern = $filePattern === self::ALL_FILES ? "*" : "*$filePattern";
-         * } else {
-         * $formattedPattern = "*" . $dateTime->format($this->filePattern['date_format']) . ".log";
-         * }
-         */
+       
         $formattedPattern = "*";
 
         foreach ($this->getFiles($formattedPattern) as $fileInfo) {
@@ -162,8 +156,8 @@ class LogParser implements LogParserInterface
         
         $parsedLogs = array_values(array_filter($parsedLogs, function ($log) use ($level, $dateTimeFrom, $dateTimeTo) {
             
-            if( $level !== 'ALL' ) {
-                return $log['level'] === $level;
+            if( $level !== 'ALL' && $log['level'] !== $level) {
+                return false;
             }
             
             $date = DateTime::createFromFormat('Y-m-d\TH:i:s.uP', $log['date']);
