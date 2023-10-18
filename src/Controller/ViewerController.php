@@ -12,12 +12,9 @@ class ViewerController extends AbstractController
 
     public function index(Request $request, LogParserInterface $logParser): Response
     {
-        $filePattern = $request->query->has('file') ? $request->query->get('file') : null;
-        $files = $logParser->getFiles($filePattern);
         $dates = $logParser->getFilesDates();
 
         return $this->render('@LogViewer/viewer/index.html.twig', [
-            'files' => $files,
             'dates' => $dates,
             'groups' => $this->getParameter('kira_log_viewer.groups')
         ]);
