@@ -29,7 +29,7 @@
                         <div class="flex-1 text-right md:text-center">
                             <h5 class="font-bold uppercase text-{{ metric.color }}">{{ metric.title }}</h5>
                             <h3 class="font-bold text-3xl">
-                                <a href="{{ path('kira_log_viewer.viewer.index', { 'level': metric.filters.level |join(',') }) }}">{{ metric.result }}</a>
+                                <a href="{{ path('kira_log_viewer.viewer.index', { 'level': metric.filters.level_name |join(',') }) }}">{{ metric.result }}</a>
                             </h3>
                         </div>
                     </div>

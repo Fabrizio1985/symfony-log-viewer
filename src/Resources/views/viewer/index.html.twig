@@ -177,8 +177,8 @@
 			});
 			
         	// Click on row
-        	$('#logsTable tbody').on('click', 'td', function () {
-        		var data = logsDataTable.cell( this ).data();
+        	$('#logsTable tbody').on('click', 'tr', function () {
+        		var data = logsDataTable.row(this).data();
         		
         		var newDiv = $(document.createElement('div')); 
 				newDiv.html(data);

@@ -28,12 +28,6 @@ class LogViewerExtension extends Extension
         $configuration = new Configuration($container->getParameter('kernel.logs_dir'));
         $config = $this->processConfiguration($configuration, $configs);
 
-        // We prepare the final regexes by replacing group names by their specific regex
-        foreach ($config['groups'] as $groupName => $groupConfig) {
-            $regex = $groupConfig['regex'];
-            $config['log_pattern'] = str_replace("<$groupName>", "(?<$groupName>$regex)", $config['log_pattern']);
-        }
-
         $container->getDefinition(LogParserInterface::class)
             ->setArgument('$logsDir', $config['logs_dir'])
             ->setArgument('$filePattern', $config['file_pattern'])

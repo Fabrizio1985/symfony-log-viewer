@@ -156,11 +156,11 @@ class LogParser implements LogParserInterface
         
         $parsedLogs = array_values(array_filter($parsedLogs, function ($log) use ($level, $dateTimeFrom, $dateTimeTo) {
             
-            if( $level !== 'ALL' && $log['level'] !== $level) {
+            if( $level !== 'ALL' && $log['level_name'] !== $level) {
                 return false;
             }
             
-            $date = DateTime::createFromFormat('Y-m-d\TH:i:s.uP', $log['date']);
+            $date = DateTime::createFromFormat('Y-m-d\TH:i:s.uP', $log['datetime']);
             $date = $date->setTimezone(new \DateTimeZone('Europe/Rome'));
             
             // See: http://userguide.icu-project.org/formatparse/datetime for pattern syntax
@@ -168,7 +168,7 @@ class LogParser implements LogParserInterface
                 return false;
             }
             
-            $log['date'] = $date->format('d-m-Y H:i:s');
+            $log['datetime'] = $date->format('d-m-Y H:i:s');
             
             return true;
         }));
@@ -217,29 +217,11 @@ class LogParser implements LogParserInterface
      *
      * @param string $lineToParse
      *
-     * @return array
+     * @return array | NULL
      * @throws Exception
      */
-    private function parseLine(string $lineToParse): array
+    private function parseLine(string $lineToParse): array | NULL
     {
-        $parsedLine = [];
-
-        $success = preg_match('/^' . $this->logPattern . '$/', $lineToParse, $parsedLine);
-
-        if (false === $success) {
-            throw new Exception('Error during log parsing !');
-        }
-
-        // If 'groups' is configured, we keep only groups defined in it.
-        if (! empty($this->groupsConfig)) {
-            foreach ($parsedLine as $key => $match) {
-
-                if (! key_exists($key, $this->groupsConfig)) {
-                    unset($parsedLine[$key]);
-                }
-            }
-        }
-
-        return $parsedLine;
+        return json_decode($lineToParse, true);
     }
 }
