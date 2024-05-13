@@ -17,7 +17,7 @@ class LogViewerExtension extends Extension
         return 'kira_log_viewer';
     }
 
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader(
             $container,

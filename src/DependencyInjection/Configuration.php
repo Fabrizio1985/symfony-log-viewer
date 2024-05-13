@@ -16,7 +16,7 @@ class Configuration implements ConfigurationInterface
         $this->defaultLogsDir = $defaultLogsDir;
     }
 
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('kira_log_viewer');
 
